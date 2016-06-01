@@ -20,12 +20,9 @@ public class VaadinUI extends UI {
     private Button save = new Button("Save", e -> saveCustomer());
 
     private Customer customer;
-    private CustomerService service;
 
     @Autowired
-    public VaadinUI(CustomerService service) {
-        this.service = service;
-    }
+    private CustomerService2 service;
 
     @Override
     protected void init(VaadinRequest request) {
