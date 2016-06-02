@@ -14,18 +14,15 @@ import java.util.List;
 @Theme("valo")
 public class VaadinUI extends UI {
 
+    @Autowired
+    private CustomerService service;
+
+    private Customer customer;
+
     private Grid grid = new Grid();
     private TextField firstName = new TextField("First name");
     private TextField lastName = new TextField("Last name");
     private Button save = new Button("Save", e -> saveCustomer());
-
-    private Customer customer;
-    private CustomerService service;
-
-    @Autowired
-    public VaadinUI(CustomerService service) {
-        this.service = service;
-    }
 
     @Override
     protected void init(VaadinRequest request) {
