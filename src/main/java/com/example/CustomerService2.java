@@ -23,6 +23,15 @@ public class CustomerService2 {
                 (rs, rowNum) -> new Customer(rs.getLong("id"), rs.getString("first_name"), rs.getString("last_name")));
     }
 
+    public List<Customer> findAll(int limit, int offset) {
+        return jdbcTemplate.query("SELECT id, first_name, last_name FROM customers LIMIT :limit OFFSET :offset",
+                new HashMap<String, Object>() {{
+                    put("limit", limit);
+                    put("offset", offset);
+                }},
+                (rs, rowNum) -> new Customer(rs.getLong("id"), rs.getString("first_name"), rs.getString("last_name")));
+    }
+
     public void update(Customer customer) {
         jdbcTemplate.update(
                 "UPDATE customers SET first_name=:first_name, last_name=:last_name WHERE id=:id",
