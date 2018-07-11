@@ -1,53 +1,59 @@
 package com.example;
 
-import com.vaadin.annotations.Theme;
-import com.vaadin.data.fieldgroup.BeanFieldGroup;
-import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.server.VaadinRequest;
-import com.vaadin.spring.annotation.SpringUI;
-import com.vaadin.ui.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.router.Route;
 
-import java.util.List;
+@Route("")
+public class VaadinUI extends VerticalLayout {
 
-@SpringUI
-@Theme("valo")
-public class VaadinUI extends UI {
-
-    @Autowired
-    private CustomerService2 service;
-
+    private CustomerService service;
     private Customer customer;
 
-    private Grid grid = new Grid();
+    private ComboBox<CustomerService> serviceComboBox = new ComboBox<>("Service");
+
+    private Grid<Customer> grid = new Grid<>(Customer.class);
     private TextField firstName = new TextField("First name");
     private TextField lastName = new TextField("Last name");
     private Button save = new Button("Save", e -> saveCustomer());
 
-    @Override
-    protected void init(VaadinRequest request) {
-        updateGrid();
+    public VaadinUI(CustomerService1 service1, CustomerService2 service2) {
+
+        serviceComboBox.setItems(service1, service2);
+        serviceComboBox.setItemLabelGenerator(s -> s.getClass().getSimpleName());
+        serviceComboBox.setWidth("220px");
+        serviceComboBox.addValueChangeListener(e -> {
+            service = e.getValue();
+            updateGrid();
+        });
+
         grid.setColumns("firstName", "lastName");
         grid.addSelectionListener(e -> updateForm());
 
-        VerticalLayout layout = new VerticalLayout(grid, firstName, lastName, save);
-        layout.setMargin(true);
-        layout.setSpacing(true);
-        setContent(layout);
+        add(serviceComboBox, grid, firstName, lastName, save);
+        setMargin(true);
+        setSpacing(true);
+
+        serviceComboBox.setValue(service1);
     }
 
     private void updateGrid() {
-        List<Customer> customers = service.findAll(2, 0);
-        grid.setContainerDataSource(new BeanItemContainer<>(Customer.class, customers));
+        grid.setItems(service.findAll());
         setFormVisible(false);
     }
 
     private void updateForm() {
-        if (grid.getSelectedRows().isEmpty()) {
+        if (grid.asSingleSelect().isEmpty()) {
             setFormVisible(false);
         } else {
-            customer = (Customer) grid.getSelectedRow();
-            BeanFieldGroup.bindFieldsUnbuffered(customer, this);
+            customer = grid.asSingleSelect().getValue();
+            Binder<Customer> binder = new Binder<>(Customer.class);
+            binder.bindInstanceFields(this);
+            binder.setBean(customer);
             setFormVisible(true);
         }
     }
